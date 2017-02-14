@@ -30,9 +30,8 @@ import chumpy as ch
 from smpl_webuser.serialization import load_model
 
 
-import fit_3d
-
-
+#import fit_3d
+import FIT_3D 
 
 
 
@@ -73,8 +72,22 @@ def call_fit_3d(img_dir,
     sph_regs_female = np.load( SPH_REGS_FEMALE_PATH )
     sph_regs_male = np.load( SPH_REGS_MALE_PATH )
     sph_regs_neutral = np.load( SPH_REGS_NEUTRAL_PATH )
+#        gender = raw_input( 'input the gender of the model( male, female or neutral )' )
+    gender = 'male'
+    if gender == 'female':
+        model = model_female
+        sph_regs = sph_regs_female
+    elif gender == 'male':
+        model = model_male
+        sph_regs = sph_regs_male
+    else :
+        model = model_neutral
+        sph_regs = sph_regs_neutral
+
+    fit_3d = FIT_3D.FIT_3D( model, 1 )
 
     imFileNames = glob( img_dir + '/*.png' )
+    imFileNames.sort()
 
     for file_name in imFileNames :
         img = cv2.imread( file_name )
@@ -97,24 +110,12 @@ def call_fit_3d(img_dir,
         joints = est[:2,:].T
         conf = est[2,:]
 
-#        gender = raw_input( 'input the gender of the model( male, female or neutral )' )
-        gender = 'male'
-        if gender == 'female':
-            model = model_female
-            sph_regs = sph_regs_female
-        elif gender == 'male':
-            model = model_male
-            sph_regs = sph_regs_male
-        else :
-            model = model_neutral
-            sph_regs = sph_regs_neutral
 
 
         params, vis = fit_3d.run_single_fit(
             img,
             joints,
             conf,
-            model,
             regs=sph_regs,
             n_betas=n_betas,
             flength=flength,
@@ -187,9 +188,9 @@ if __name__ == "__main__":
         SPH_REGS_MALE_PATH = join(MODEL_DIR,
                                   'regressors_locked_normalized_male.npz')
 
-    img_dir = '/home/zhichaozeng/Research/Datas/Videos/20161220/cuttedImage/2D_pose'
-    data_dir = '/home/zhichaozeng/Research/Datas/Videos/20161220/cuttedImage/2D_pose'
-    out_dir = '/home/zhichaozeng/Research/Datas/Videos/20161220/cuttedImage/2D_pose/result'
+    img_dir = '/home/zhichaozeng/Research/Datas/TestDatas/cuttedImage/2D_pose'
+    data_dir = '/home/zhichaozeng/Research/Datas/TestDatas/cuttedImage/2D_pose'
+    out_dir = '/home/zhichaozeng/Research/Datas/TestDatas/cuttedImage/2D_pose/result'
 
     #call the DeepCut to get the pose
    #pose = estimate_pose( image, model_def, model_bin, scales )
